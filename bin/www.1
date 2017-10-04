@@ -1,0 +1,256 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('wechat-back:server');
+var http = require('http');
+var axios = require('axios');
+var rander = require('../models/rander.js')
+var lottery = require('../controllers/lottery.js')
+var lotteryDetails = require('../controllers/lotteryDetails.js')
+var async = require('async')
+// var mchArr = []
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '4000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+var io = require('socket.io')(server);
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+var onlineUsers = {};
+//当前在线人数
+var onlineCount = 0;
+
+// 当前在抽奖中商户数
+var onlineMerchants = {}
+var onlineMerchantsCount = 0
+// 当前所有在线socket
+var allSocket = {}
+
+// 当前所有已参与的玩家
+var onlinePlayers = {}
+var onlinePlayersCount = 0
+// 管理员socket列表
+var onlineOwnerSocket = {}
+// 当前所有lottery_id
+var lottery_id = {}
+var low_price_obj = {}
+io.on('connection', function(socket){
+	console.log('a user connected');
+	
+	//监听新用户加入
+	socket.on('login', function(obj){
+		//将新加入用户的唯一标识当作socket的名称，后面退出的时候会用到
+		socket.name = obj.userid
+    socket.mch_id = obj.mch_id
+    // {1:[socket1,socket2...],2:[,,,],,,}
+    allSocket[obj.mch_id] = allSocket[obj.mch_id] == undefined ? []:allSocket[obj.mch_id]
+    allSocket[obj.mch_id].push(socket)
+
+		//检查在线列表，如果不在里面就加入
+		if(!onlineUsers.hasOwnProperty(obj.userid)) {
+			onlineUsers[obj.userid] = obj;
+			//在线人数+1
+			onlineCount++;
+      console.log("在线人数:"+onlineCount)
+      console.log("在线play人数:"+onlinePlayersCount)
+      console.log("在线merchant数:"+onlineMerchantsCount)
+		}
+		
+		//向所有客户端广播用户加入
+		io.emit('login', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj,login:true});
+		console.log(obj.username+'加入了聊天室');
+	});
+
+  socket.on('join',function(user,lottery_id){
+    console.log("5:加入了一个用户"+user.nick)
+    onlinePlayers[user.mch_id] = onlinePlayers[user.mch_id] == undefined ? []:onlinePlayers[user.mch_id]
+    onlinePlayers[user.mch_id].push(socket)
+    onlinePlayersCount ++
+    console.log("5-1:总玩家数"+onlinePlayersCount)
+    lotteryDetails.join(user,lottery_id)
+    .then((ret)=>{
+      var playerArr = onlinePlayers[user.mch_id]
+      playerArr.forEach(function(player,i){
+        console.log('5-2-'+i+':通知所有参与进来的玩家')
+        player.emit('notify',user)
+      })
+    })
+
+  })
+
+	//监听用户退出
+	socket.on('disconnect', function(){
+		//将退出的用户从在线列表中删除
+		if(onlineUsers.hasOwnProperty(socket.name)) {
+			//退出用户的信息
+			var obj = {userid:socket.name, username:onlineUsers[socket.name]};
+			
+			//删除
+			delete onlineUsers[socket.name];
+			//在线人数-1
+			onlineCount--;
+			
+			//向所有客户端广播用户退出
+			io.emit('logout', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj,logout:true});
+			console.log(obj.username+'退出了聊天室');
+		}
+	});
+	
+	//监听用户发布聊天内容
+	socket.on('changeInfo', function(obj){
+		//向所有客户端广播发布的消息
+		io.emit('changeInfo', obj);
+		console.log(obj.username+'更改了信息');
+	});
+	//监听更改信息
+	socket.on('message', function(obj){
+		//向所有客户端广播发布的消息
+		io.emit('message', obj);
+		console.log(obj.username+'说：'+obj.msg);
+	});
+  
+	socket.on('start',function(setting){
+    // 1、后台打印一个抽奖事件
+		console.log("1:" + setting.mch_name + '开始了一个抽奖')
+    
+    // 1.5、当前商户的管理员
+    onlineOwnerSocket[setting.mch_id] = socket
+
+    // 2、通知数据库序列化一个抽奖
+    lottery.lottery_add(setting)
+    .then((ret)=>{
+      // var _lottery_id = ret.dataValues.lottery_id
+      console.log("2:" + setting.mch_name + '数据库创建完成:lottery_id=' + ret.dataValues.lottery_id)
+      lottery_id[setting.mch_id] = ret.dataValues.lottery_id
+      low_price_obj[setting.mch_id] = ret.dataValues.low_price
+      // 3、将商户抽奖对象初始化
+      onlineMerchants[setting.mch_id] = setting
+      onlineMerchantsCount ++
+      console.log("当前正在进行的抽奖商户数:"+onlineMerchantsCount)
+      console.log('3:正在抽奖的商户新增一条记录:' + onlineMerchants[setting.mch_id] )
+      // 4、通知本商户用户(allSockets)变更状态
+      // io.emit('start',setting.mch_id)
+      var targetArr = allSocket[setting.mch_id]
+      targetArr.forEach(function(target,i){
+        console.log("4:准备通知socket:"+i+":"+lottery_id[setting.mch_id])
+        target.emit('start',lottery_id[setting.mch_id],low_price_obj[setting.mch_id])
+      })
+      // 5、开始定时
+      setTimeout(function(){
+
+        // console.log('id1:'+lottery_id[setting.mch_id])
+
+        // 6、到期后执行抽奖
+        console.log("8:时间到开启的商户抽奖号为" + lottery_id[setting.mch_id])
+        rander.getRander(lottery_id[setting.mch_id])
+        .then((ret)=>{
+          
+          // 7、 通知所有人(onlinePlayers)开奖
+          // io.emit('end',ret)
+          var playerArr = onlinePlayers[setting.mch_id]
+          console.log("9:lucker's info=" + ret)
+          playerArr.push(onlineOwnerSocket[setting.mch_id])
+          playerArr.forEach(function(player,i){
+            console.log("10-"+i+":通知结果")
+            player.emit('end',ret)
+          })
+          // targetArr.forEach(function(target){
+          //   target.emit('end',ret)
+          // })
+          // 8、将商户从列表中清除
+          // mchArr = mchArr.filter(function(m){
+          //   return m.mch_id != ret.mch_id
+          // })
+          onlineMerchants[setting.mch_id] = undefined
+          onlineMerchantsCount --
+          console.log("当前正在进行的抽奖商户数"+onlineMerchantsCount)
+
+        })
+        .catch((error)=>{
+            console.log(error)
+        })
+      },10000)
+
+    })
+  
+	})
+
+});
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
