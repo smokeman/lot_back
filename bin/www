@@ -37,24 +37,12 @@ var onlineUsers = []
 //当前在线人数
 var onlineCount = 0
 
-// 当前在抽奖中商户数
-var onlineMerchants = {}
-var onlineMerchantsCount = 0
-// 当前所有在线socket
-var allSocket = {}
-
 // 当前所有已参与的玩家
-var onlinePlayers = {}
-var onlinePlayersCount = 0
+var luckerArr = {}
 // 管理员socket列表
-var onlineOwnerSocket = {}
-// 当前所有lottery_id
-// var lottery_id = {}
 var lottery_id_arr = {}
 var luck_num = {}
-var low_price_obj = {}
 
-var startTime = {}
 var lists = {}
 var luckerArr = {}
 const rooms = {}
@@ -64,20 +52,6 @@ io.on('connection', function (socket) {
 
   // 用户登录 [1]
   socket.on('login', function (user) {
-    // if(user.usertype === 1){
-    // 管理员
-    // }
-    // if(user.usertype === 2){
-    // 一般用户
-    // }
-
-    //将新加入用户的唯一标识当作socket的名称，后面退出的时候会用到
-    // socket.userid = user.userid
-    // socket.nick = user.nick
-    // socket.mch_id = user.mch_id
-    // {1:[socket1,socket2...],2:[,,,],,,}
-    // allSocket[user.mch_id] = allSocket[user.mch_id] == undefined ? []:allSocket[user.mch_id]
-    // allSocket[user.mch_id].push(socket)
 
     //如果含有这个属性说明后台有这个商户
 
@@ -150,23 +124,7 @@ io.on('connection', function (socket) {
       }
     }
 
-    // if (!onlineUsers[user.mch_id].hasOwnProperty(user.nick)) {
-    // user.nick作为id号，以后要改用openid
-    // onlineRooms = onlineUsers[user.mch_id]
-    // onlineRooms[user.nick] = user.nick
-    // console.log("[login]1-2:[" + user.mch_id + "]房间当前人数为:" + onlineUsers[user.mch_id].length)
     console.log("[login]1-2:[" + user.mch_id + "]房间当前人数为:" + rooms[user.mch_id].userArr.length)
-    // }
-    // onlineRooms[user.nick]["socket"] = socket
-    // onlineRooms[user.nick]["usertype"] = user.usertype
-
-    //在线人数+1
-    // onlineCount++
-
-    // console.log("在线人数:"+onlineCount)
-    // console.log("在线play人数:"+onlinePlayersCount)
-    // console.log("在线merchant数:"+onlineMerchantsCount)
-
 
     //向所有客户端广播用户加入
     // io.emit('login', {onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj,login:true});
@@ -221,14 +179,7 @@ io.on('connection', function (socket) {
           console.log(lottery_id_arr[socket.mch_id])
           console.log("[start]2-5:通知:已通知到第" + (i + 1) + "个人")
         })
-        // console.log('3:正在抽奖的商户新增一条记录:' + onlineMerchants[setting.mch_id] )
-        // 5、通知本商户用户(allSockets)变更状态
-        // io.emit('start',setting.mch_id)
-        // var targetArr = allSocket[setting.mch_id]
-        // targetArr.forEach(function(target,i){
-        //   console.log("4:准备通知socket:"+i+":"+lottery_id[setting.mch_id])
-        //   target.emit('start',lottery_id[setting.mch_id],low_price_obj[setting.mch_id])
-        // })
+
         // 3、开始定时
         console.log("[start]3:" + socket.mch_id + "开始定时")
 
