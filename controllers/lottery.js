@@ -3,7 +3,7 @@ const lotteryDetails = require('../models/lotteryDetails.js')
 const serial = require('../models/serial.js')
 var Sequelize = require('sequelize');
 // const dateformat = require('dateformat')
-const xml2json = require('xml2json')
+// const xml2json = require('xml2json')
 const MAX_ID = require('../models/maxid.js')
 
 const dateformat = require('dateformat')
