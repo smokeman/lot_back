@@ -47,7 +47,7 @@ var lists = {}
 var luckerArr = {}
 const rooms = {}
 
-io.on('/lot/connection', function (socket) {
+io.on('connection', function (socket) {
   console.log('a user connected');
 
   // 用户登录 [1]
