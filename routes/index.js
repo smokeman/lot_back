@@ -28,7 +28,7 @@ router.use('/sign',wechat(config,function(req,res,next){
     encodingAESKey:'mrf3yFtmdVr53cUtt9ZF7Ch4PKyEX3ZTysPxrH6OfMv'
   }
   var api = new wechatapi(config.appid,config.appsecret);
-  res.replay('11111111');
+  res.reply('11111111');
 
 
 }))
