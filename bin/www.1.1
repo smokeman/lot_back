@@ -48,10 +48,6 @@ var lists = {}
 var luckerArr = {}
 const rooms = {}
 
-// 通知器-
-// 想要获取通知就要订阅它
-const NOTIFIER = require('./notifier.js')
-
 // 缓存取酒socket,当取酒的时候缓存一个
 var wineSocket = {}
 
@@ -289,87 +285,51 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('wine_notify',function(){
-    rooms[1].userArr.forEach((player, i) => {
-      // if (player.nick == user.nick) {
-      //   player.isPlayer = true
-      // }
-      console.log('s')
-      if (player.isPlayer) {
-
-        // 如果是本房间的玩家，就发送通知
-        // player.socket.emit("notify", user)
-      }else{
-        player.socket.emit("wine_listening")
-      }
-    })
+  socket.on('wine_add',function(wine_info){
+    wine.wine_add(wine_info)
+      .then((wine_id)=>{
+        // 后台保存完信息后通知自己保存完毕
+        socket.emit('wine_save',wine_id)
+        console.log('存酒完成')
+      })
   })
-
-// 成功执行一个命令，想要得到通知，就要订阅
-  socket.on('subscribe',function(_user){
-    NOTIFIER.subscribe({
-      socket:socket,
-      mch_id:_user.mch_id,
-      user_id:_user.user_id,
-      openid:_user.openid,
-      tag:_user.tag
-    })
-  })
-
-  socket.on('notify',function(_cause,_data){
-    NOTIFIER.notify(_cause,_data)
-  })
-
-  socket.on('cancelSubscribe',function(_cause){
-    NOTIFIER.cancelSubscribe(_cause)
-  })
-
-
-  // socket.on('wine_add',function(wine_info){
-  //   wine.wine_add(wine_info)
-  //     .then((wine_id)=>{
-  //       // 后台保存完信息后通知自己保存完毕
-  //       socket.emit('wine_save',wine_id)
-  //       console.log('存酒完成')
-  //     })
-  // })
 
   // 管理员
   // 取酒:获得单个信息-管理员用
-  // socket.on('wine_getbyid',function(_wine_id){
-  //   wine.getById(_wine_id)
-  //     .then((ret)=>{
-  //       socket.emit('wine_getbyid',ret)
-  //       console.log('取酒完成')
-  //     })
-  // })
+  socket.on('wine_getbyid',function(_wine_id){
+    wine.getById(_wine_id)
+      .then((ret)=>{
+        socket.emit('wine_getbyid',ret)
+        console.log('取酒完成')
+      })
+  })
 
   // 管理员查看到信息－更新状态为已取酒状态－更新取酒时间
-  // socket.on('wine_updatebyid',function(_wine_id){
-  //   wine.updateById(_wine_id)
-  //     .then((ret)=>{
-  //       // 如果更新成功
-  //       // socket告诉用户，已取酒
-  //       wineSocket[ret.openid].emit('wine_updated')
-  //     })
-  // })
+  socket.on('wine_updatebyid',function(_wine_id){
+    wine.updateById(_wine_id)
+      .then((ret)=>{
+        // 如果更新成功
+        // socket告诉用户，已取酒
+        wineSocket[ret.openid].emit('wine_updated')
+      })
+  })
 
 
   // 获得此人所有存酒信息－玩家用
-  // socket.on('wine_getbyuser',function(_user){
-  //   wine.getArrByUser(_user.openid)
-  //     .then((retArr)=>{
-  //       socket.emit('wine_getbyuser',retArr)
-  //     })
-  //     .catch((error)=>{
-  //       console.log(error)
-  //     })
-  // })
+  socket.on('wine_getbyuser',function(_user){
+    wine.getArrByUser(_user.openid)
+      .then((retArr)=>{
+        socket.emit('wine_getbyuser',retArr)
+      })
+      .catch((error)=>{
+        console.log(error)
+      })
+  })
 
   // 玩家点击取酒，给服务器开启一个通知
-  // socket.on('wine_pull_await',function(_user){
-  //   wineSocket[_user.openid] = socket
-  // })
+  socket.on('wine_pull_await',function(_user){
+    wineSocket[_user.openid] = socket
+  })
 
 
 });

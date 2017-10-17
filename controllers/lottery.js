@@ -9,6 +9,7 @@ const MAX_ID = require('../models/maxid.js')
 const dateformat = require('dateformat')
 const _s_date = dateformat(new Date(), 'mmdd')
 const rander = require('../models/rander.js')
+
 // var getSerial = function(_mch_id) {
 // var _s_date = dateformat(new Date(), 'mmdd')
 // let test = require('../models/serial.js')

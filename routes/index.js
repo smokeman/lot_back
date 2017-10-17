@@ -79,4 +79,6 @@ router.post('/merchant_add',merchant.add)
 
 router.get('/lottery_end',lottery.getRander)
 
+
+
 module.exports = router;

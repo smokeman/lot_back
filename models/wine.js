@@ -34,6 +34,9 @@ let Merchant = db.define('chat_wine', {
         oper_nick: {
             type: Sequelize.STRING(20),
         },
+        status:{
+            type: Sequelize.INTEGER(1)
+        },
         create_time: {
             type: Sequelize.DATE,
         },
