@@ -70,32 +70,32 @@ router.get('/', function(req, res) {
       (data) => {
           var obj = JSON.parse(data);
           userinfo = obj
-          userinfo.findOne({
-              openid: OPENID
-          }, function(err, msg) {
-              if (err) {
-                  res.send(err);
-                  return console.err(err);
-              }
-              if (!msg) {
-                  var user = new Userinfo({
-                      openid: userinfo.openid,
-                      nickname: userinfo.nickname,
-                      sex: userinfo.sex,
-                      province: userinfo.province,
-                      city: userinfo.city,
-                      country: userinfo.country,
-                      headimgurl: userinfo.headimgurl,
-                      privilege: userinfo.privilege,
-                      unionid: userinfo.unionid
-                  });
+        //   Userinfo.findOne({
+        //       openid: OPENID
+        //   }, function(err, msg) {
+        //       if (err) {
+        //           res.send(err);
+        //           return console.err(err);
+        //       }
+        //       if (!msg) {
+        //           var user = new Userinfo({
+        //               openid: userinfo.openid,
+        //               nickname: userinfo.nickname,
+        //               sex: userinfo.sex,
+        //               province: userinfo.province,
+        //               city: userinfo.city,
+        //               country: userinfo.country,
+        //               headimgurl: userinfo.headimgurl,
+        //               privilege: userinfo.privilege,
+        //               unionid: userinfo.unionid
+        //           });
 
-                  user.save(function(err, user) {
-                      if (err) return console.log(err, '错误信息');
-                  });
-              }
-              res.render('welecome');
-          })
+        //           user.save(function(err, user) {
+        //               if (err) return console.log(err, '错误信息');
+        //           });
+        //       }
+              res.render(OPENID);
+        //   })
       });
 });
 //获取基本信息页
@@ -170,7 +170,7 @@ router.post('/user_add',user.add)
 
 router.post('/merchant_add',merchant.add)
 
-// router.get('/rander_get',lottery.getRander)
+router.get('/rander_get',lottery.getRander)
 
 router.get('/lottery_end',lottery.getRander)
 
