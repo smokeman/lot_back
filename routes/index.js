@@ -94,7 +94,7 @@ router.get('/', function(req, res) {
         //               if (err) return console.log(err, '错误信息');
         //           });
         //       }
-              res.render(OPENID);
+              res.render('welecome');
         //   })
       });
 });
