@@ -90,7 +90,7 @@ exports.save = (req,res) => {
 
     coupon.create(obj)
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin","*");
+        // res.header("Access-Control-Allow-Origin","*");
         var id = ret.id
         res.send({id})
     })
@@ -99,7 +99,7 @@ exports.save = (req,res) => {
 exports.getByMchId = (req,res) => {
     coupon.findAll({where:{"mch_id":req.query.mch_id}})
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         var couponArr = []
         ret.forEach((el,i)=>{
             // couponArr.push(Coupon.toExchange(ret[i]))
@@ -112,7 +112,7 @@ exports.getByMchId = (req,res) => {
 exports.getByUserId = (req,res) => {
     couponDetails.findAll({where:{"openid":req.query.openid}})
     .then((rets)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         var chat_coupon_id_arr = []
         rets.forEach((item)=>{
             chat_coupon_id_arr.push(item.chat_coupon_id)
@@ -154,7 +154,7 @@ exports.getByAutoId = (req,res) => {
             }
         ]
     }).then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         res.send({
             price:ret[0].price,
             low_price:ret[0].low_price,
@@ -172,7 +172,7 @@ exports.collect = (req,res) => {
     // 查重
     couponDetails.findAll({where:{chat_coupon_id:parseInt(json["coupon_id"]),openid:json["openid"]}})
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         if(ret.length == 0){
             couponDetails.create({chat_coupon_id:parseInt(json["coupon_id"])
                 ,openid:json["openid"]
@@ -239,7 +239,7 @@ exports.getPayList1 = (req,res) => {
         }
     }})
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         res.send()
         console.log(ret)
         // var coupon_id_arr = []
@@ -287,7 +287,7 @@ exports.getPayList = (req,res) => {
             "pay_date":dateCause
         }
     }).then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
+        // res.header("Access-Control-Allow-Origin", "*");
         res.send({
             coupon_price:ret.coupon_price,
             coupon_num:ret.coupon_num,

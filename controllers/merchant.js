@@ -19,6 +19,13 @@ exports.add = (req,res)=>{
     })
 }
 
+exports.getById = (req,res) => {
+    merchant.findById(req.query.mch_id)
+    .then((ret)=>{
+        res.send(ret)
+    })
+}
+
 exports.get = (req,res)=>{
     merchant.findAll()
     .then((ret)=>{

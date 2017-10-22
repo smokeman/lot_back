@@ -57,7 +57,6 @@ exports.save = (req,res)=> {
     obj.status = 1
     wine.create(obj)
         .then((wine_ret)=>{
-            res.header("Access-Control-Allow-Origin", "*");
             // res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, OPTIONS');
             // res.header("Access-Control-Allow-Headers", "X-Requested-With");
             // res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -73,7 +72,6 @@ exports.update = (req,res) => {
         .then((ret)=>{
             // resolve(ret)
             console.log('update success')
-            res.header("Access-Control-Allow-Origin", "*");
             res.send('success')
         })
         .catch((error)=>{
@@ -84,7 +82,6 @@ exports.update = (req,res) => {
 exports.getbyid = (req,res) => {
     wine.findById(req.query.wine_id)
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin", "*");
         res.send(ret)
     })
 }
@@ -93,7 +90,6 @@ exports.getArrByUser = (req,res) => {
     var openid = req.query.openid
     wine.findAll({where:{openid}})
     .then((ret)=>{
-        res.header("Access-Control-Allow-Origin","*");
         res.send(ret)
     })
 }
@@ -106,7 +102,6 @@ exports.do = (req,res) => {
         .then((ret)=>{
             // resolve(ret)
             console.log('update success')
-            res.header("Access-Control-Allow-Origin", "*");
             res.send('success')
         })
         .catch((error)=>{

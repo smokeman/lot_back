@@ -18,14 +18,20 @@ var User = sequelize.define('sys_user', {
         pwd: {
             type: Sequelize.BLOB,
         },
-        role_id: {
-            type: Sequelize.INTEGER(2)
+        role: {
+            type: Sequelize.STRING(20)
         },
         mch_id: {
             type: Sequelize.INTEGER(11)
         },
+        mch_name: {
+            type: Sequelize.STRING(100)
+        },
         weixin_code: {
             type: Sequelize.INTEGER(30),
+        },
+        header_url:{
+            type:Sequelize.STRING(200),
         },
         openid: {
             type: Sequelize.STRING(30)

@@ -5,19 +5,27 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var template = require('art-template');
+
+var app = express();
+
+template.config('base', '');
+template.config('extname', '.html');
+app.engine('.html', template.__express);
+app.set('view engine', 'html');
+//app.set('views', __dirname + '/views');
+
 var index = require('./routes/index');
-var user = require('./routes/user');
+var users = require('./routes/users');
 var token = require('./routes/token');
 var wine = require('./routes/wine');
 var coupon = require('./routes/coupon');
 var merchant = require('./routes/merchant');
 
-var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.engine('.html', template.__express);
-app.set('view engine', 'html');
+// app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -27,13 +35,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/user', user);
-app.use('/token', token);
-app.use('/wine',wine);
-app.use('/coupon',coupon);
-app.use('/merchant',merchant)
-
 app.all('*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -42,6 +43,13 @@ app.all('*', function(req, res, next) {
   res.header("Content-Type", "application/json;charset=utf-8");
   next();
 });
+
+app.use('/', index);
+app.use('/users', users);
+app.use('/token', token);
+app.use('/wine',wine);
+app.use('/coupon',coupon);
+app.use('/merchant',merchant)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

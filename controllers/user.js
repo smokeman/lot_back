@@ -14,3 +14,36 @@ exports.add = (req,res)=>{
         res.send({info:'1'})
     })
 }
+
+exports.grantTo = (req,res) => {
+    user.update({mch_id:req.query.mch_id,role:req.query.role,status:1},{where:{
+        openid:req.query.openid
+    }}).then((ret)=>{
+        res.send('success')
+    }).catch((error)=>{
+        console.log(error)
+    })
+}
+
+exports.grantBoss = (req,res) => {
+    user.update({mch_id:parseInt(req.query.mch_id),role:"2",status:1},{where:{
+        openid:req.query.openid
+    }}).then((ret)=>{
+        res.send({info:'success'})
+    }).catch((error)=>{
+        console.log(error)
+    })
+}
+
+exports.updateName = (req,res) => {
+    var json = req.body
+    user.update({username:json["username"]},{
+        where:{
+            openid:json["openid"]
+        }
+    }).then((ret)=>{
+        res.send(ret)
+    }).catch((error)=>{
+        console.log(error)
+    })
+}
