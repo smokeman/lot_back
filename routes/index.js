@@ -70,7 +70,8 @@ router.get('/wx_login', function(req,res, next){
     // 第一步：用户同意授权，获取code
     var router = 'get_wx_access_token';
     // 这是编码后的地址
-    var return_uri = 'http%3a%2f%2fwww.aoxingtec.cn%2f'+router;  
+    var return_uri = 'http%3a%2f%2fchat.ha.aoxing.aoxingtec.cn%2f'+router;
+    
     var scope = 'snsapi_userinfo';
 
     res.redirect('https://open.weixin.qq.com/connect/oauth2/authorize?appid='+AppID+'&redirect_uri='+return_uri+'&response_type=code&scope='+scope+'&state=STATE#wechat_redirect');
@@ -154,7 +155,8 @@ router.get('/get_wx_access_token', function(req,res, next){
                                     userinfo.mch_id = ret[0].mch_id
                                     userinfo.mch_name = ret[0].mch_name
                                     userinfo.role = ret[0].role
-                                    userinfo.usernmae = ret[0].username
+                                    userinfo.usernmae = ret[0].user_name
+                                    console.log(userinfo)
                                     res.render('index_prod.html',{name:JSON.stringify(userinfo)});
                                 }
                             })

@@ -11,4 +11,6 @@ router.get('/grantTo',user.grantTo)
 
 router.get('/grantBoss',user.grantBoss)
 
+router.post('/updateName',user.updateName)
+
 module.exports = router;
